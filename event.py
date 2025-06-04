@@ -35,12 +35,12 @@ class PushEvent(GitHubEvent):
         commit_message = head_commit.get("message", "Aucun message") if head_commit else "Aucun message"
 
         return (
-            f"🚀 **Nouveau Push sur** {common_info['repo_name']}\n"
-            f"🌿 **Branche/Tag :** {ref}\n"
-            f"📝 **Commits :** {commit_count}\n"
-            f"🔧 **Dernier commit :** {commit_message[:500]}...\n"
-            f"👤 **Auteur :** {common_info['sender_username']}\n"
-            f"📎 [Voir dépôt]({common_info['repo_url']}) "
+            f"🚀 **Nouveau Push sur** `{common_info['repo_name']}`\n"
+            f"🌿 **Branche/Tag :** `{ref}`\n"
+            f"📝 **Commits :** `{commit_count}`\n"
+            f"🔧 **Dernier commit :** `{commit_message[:500]}`...\n"
+            f"👤 **Auteur :** `{common_info['sender_username']}`\n"
+            f"📎 [Voir dépôt](`{common_info['repo_url']}`) "
         )
 
 class PullRequestEvent(GitHubEvent):
@@ -69,12 +69,12 @@ class PullRequestEvent(GitHubEvent):
             pr_reviewers_str = "Reviewers : " + ", ".join(telegram_reviewers)
 
         return (
-            f"🔃 **Nouvelle Pull Request sur** {common_info['repo_name']}\n"
-            f"📌 **PR #{pr_number} :** {pr_title[:100]}...\n"
-            f"🌿 **Branche/Tag :** {head_branch} → {base_branch}\n"
-            f"👤 **Auteur :** {common_info['sender_username']}\n"
-            f"👀 **Reviewers assignés :** {pr_reviewers_str}\n"
-            f"📎 [Voir PR]({pr_url}) "
+            f"🔃 **Nouvelle Pull Request sur** `{common_info['repo_name']}`\n"
+            f"📌 **PR #`{pr_number}` :** `{pr_title[:100]}`...\n"
+            f"🌿 **Branche/Tag :** `{head_branch}` → `{base_branch}`\n"
+            f"👤 **Auteur :** `{common_info['sender_username']}`\n"
+            f"👀 **Reviewers assignés :** `{pr_reviewers_str}`\n"
+            f"📎 [Voir PR](`{pr_url}`) "
         )
     
 class PullRequestReviewEvent(GitHubEvent):
@@ -103,14 +103,14 @@ class PullRequestReviewEvent(GitHubEvent):
 
         body = review.get("body", "")
         msg = (
-            f"{emoji} {reviewer} {state_str} la PR de {pr_author} :\n"
-            f"📌 **PR #{pr_number} :** {pr_title[:500]}...\n"
+            f"{emoji} `{reviewer}` `{state_str}` la PR de `{pr_author}` :\n"
+            f"📌 **PR #`{pr_number}` :** `{pr_title[:500]}`...\n"
         )
 
         if body:
-            msg += f"**Commentaire :**\n{body[:500]}...\n"
+            msg += f"**Commentaire :**\n`{body[:500]}`...\n"
         
-        msg += f"📎 [Voir PR]({pr_url})"
+        msg += f"📎 [Voir PR](`{pr_url}`)"
         return msg
     
 class CreateBranchEvent(GitHubEvent):
@@ -125,10 +125,10 @@ class CreateBranchEvent(GitHubEvent):
             action = "Nouveau Tag créé"
 
         return (
-            f"✨ **{action} :** {common_info['repo_name']}\n"
-            f"🌿 **Branch/Tag :** {ref}\n"
-            f"👤 **Auteur :** {common_info['sender_username']}\n"
-            f"📎 [Voir dépôt]({common_info['repo_url']})"
+            f"✨ **`{action}` :** `{common_info['repo_name']}`\n"
+            f"🌿 **Branch/Tag :** `{ref}`\n"
+            f"👤 **Auteur :** `{common_info['sender_username']}`\n"
+            f"📎 [Voir dépôt](`{common_info['repo_url']}`)"
         )
     
 class DeleteBranchEvent(GitHubEvent):
@@ -143,10 +143,10 @@ class DeleteBranchEvent(GitHubEvent):
             action = "Tag supprimé"
         
         return (
-            f"✨ **{action} :** {common_info['repo_name']}\n"
-            f"🌿 **Branch/Tag :** {ref}\n"
-            f"👤 **Auteur :** {common_info['sender_username']}\n"
-            f"📎 [Voir dépôt]({common_info['repo_url']})"
+            f"🗑️ **`{action}` :** `{common_info['repo_name']}`\n"
+            f"🌿 **Branch/Tag :** `{ref}`\n"
+            f"👤 **Auteur :** `{common_info['sender_username']}`\n"
+            f"📎 [Voir dépôt](`{common_info['repo_url']}`)"
         )
 
 EVENT_CLASSES = {
