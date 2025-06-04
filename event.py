@@ -33,6 +33,15 @@ class PushEvent(GitHubEvent):
         commit_count = len(commits)
         head_commit = self.data.get("head_commit", {})
         commit_message = head_commit.get("message", "Aucun message") if head_commit else "Aucun message"
+        is_new_branch = self.data.get("created", False) and self.data.get("before", "").startswith("000")
+
+        if is_new_branch:
+            return (
+                f"✨ **Nouvelle branche créée :** `{common_info['repo_name']}`\n"
+                f"🌿 **Branche :** `{ref}`\n"
+                f"👤 **Auteur :** {common_info['sender_username']}\n"
+                f"📎 [Voir dépôt]({common_info['repo_url']})"
+            )
 
         return (
             f"🚀 **Nouveau Push sur** `{common_info['repo_name']}`\n"
@@ -40,7 +49,7 @@ class PushEvent(GitHubEvent):
             f"📝 **Commits :** `{commit_count}`\n"
             f"🔧 **Dernier commit :** `{commit_message[:500]}`...\n"
             f"👤 **Auteur :** `{common_info['sender_username']}`\n"
-            f"📎 [Voir dépôt](`{common_info['repo_url']}`) "
+            f"📎 [Voir dépôt]({common_info['repo_url']}) "
         )
 
 class PullRequestEvent(GitHubEvent):
@@ -74,7 +83,7 @@ class PullRequestEvent(GitHubEvent):
             f"🌿 **Branche/Tag :** `{head_branch}` → `{base_branch}`\n"
             f"👤 **Auteur :** `{common_info['sender_username']}`\n"
             f"👀 **Reviewers assignés :** `{pr_reviewers_str}`\n"
-            f"📎 [Voir PR](`{pr_url}`) "
+            f"📎 [Voir PR]({pr_url}) "
         )
     
 class PullRequestReviewEvent(GitHubEvent):
@@ -110,7 +119,7 @@ class PullRequestReviewEvent(GitHubEvent):
         if body:
             msg += f"**Commentaire :**\n`{body[:500]}`...\n"
         
-        msg += f"📎 [Voir PR](`{pr_url}`)"
+        msg += f"📎 [Voir PR]({pr_url})"
         return msg
     
 class CreateBranchEvent(GitHubEvent):
@@ -128,7 +137,7 @@ class CreateBranchEvent(GitHubEvent):
             f"✨ **`{action}` :** `{common_info['repo_name']}`\n"
             f"🌿 **Branch/Tag :** `{ref}`\n"
             f"👤 **Auteur :** `{common_info['sender_username']}`\n"
-            f"📎 [Voir dépôt](`{common_info['repo_url']}`)"
+            f"📎 [Voir dépôt]({common_info['repo_url']})"
         )
     
 class DeleteBranchEvent(GitHubEvent):
@@ -146,7 +155,7 @@ class DeleteBranchEvent(GitHubEvent):
             f"🗑️ **`{action}` :** `{common_info['repo_name']}`\n"
             f"🌿 **Branch/Tag :** `{ref}`\n"
             f"👤 **Auteur :** `{common_info['sender_username']}`\n"
-            f"📎 [Voir dépôt](`{common_info['repo_url']}`)"
+            f"📎 [Voir dépôt]({common_info['repo_url']})"
         )
 
 EVENT_CLASSES = {
