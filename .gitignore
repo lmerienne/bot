@@ -1,0 +1,47 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environnements virtuels
+ven/
+env/
+.ven/
+ENV/
+Pipfile.lock
+poetry.lock
+
+# Fichiers de logs
+*.log
+
+# Fichiers de configuration sensibles
+.env
+.env.*
+*.env
+
+# Fichiers de base de données et temporaires
+*.sqlite3
+*.db
+*.sqlite
+*.bak
+*.tmp
+
+# Fichiers de cache
+.cache/
+*.egg-info/
+dist/
+build/
+
+# Fichiers utilisateurs (ex: mapping utilisateurs)
+users.json
+
+# Fichiers d’IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# MacOS
+.DS_Store
+
+# Linux
+*.~ 
