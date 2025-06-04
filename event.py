@@ -88,10 +88,10 @@ class PullRequestEvent(GitHubEvent):
 
         return (
             f"🔃 **Nouvelle Pull Request sur** `{common_info['repo_name']}`\n"
-            f"📌 **PR #`{pr_number}` :** `{pr_title[:100]}`...\n"
+            f"📌 **PR #{pr_number} :** `{pr_title[:100]}`...\n"
             f"🌿 **Branche/Tag :** `{head_branch}` → `{base_branch}`\n"
             f"👤 **Auteur :** `{common_info['sender_username']}`\n"
-            f"👀 **Reviewers assignés :** `{pr_reviewers_str}`\n"
+            f"👀 `{pr_reviewers_str}`\n"
             f"📎 [Voir PR]({pr_url}) "
         )
     
@@ -113,11 +113,11 @@ class PullRequestReviewEvent(GitHubEvent):
 
         state = review.get("state", "commented").lower()
         state_map = {
-            "approved":          ("✅", "**a approuvé**"),
-            "changes_requested": ("🛑", "**a demandé des changements sur**"),
-            "commented":         ("💬", "**a commenté**"),
+            "approved":          ("✅", "a approuvé"),
+            "changes_requested": ("🛑", "a demandé des changements sur"),
+            "commented":         ("💬", "a commenté"),
         }
-        emoji, state_str = state_map.get(state, ("🔔", "**a fait une review sur**"))
+        emoji, state_str = state_map.get(state, ("🔔", "a fait une review sur"))
 
         body = review.get("body", "")
         msg = (

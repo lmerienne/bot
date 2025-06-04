@@ -6,7 +6,10 @@ FILTERS = {
                     "pull_request_review", 
                     "create_branch_event", 
                     "delete_branch_event"],
-                    
+    
+    "pull_request_actions": ["opened",
+                            "reopened"],
+
     "excluded_actions": ["synchronize"],
 }
 
@@ -19,6 +22,9 @@ class MessageFilter:
             return False
         
         action = data.get("action", "")
+        if event_type == "pull_request":
+            if action not in self.filters.get("pull_request_actions", []):
+                return False
         if action in self.filters["excluded_actions"]:
             return False
         
