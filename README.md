@@ -30,11 +30,11 @@ Basé sur FastAPI et python-telegram-bot
    
    Créer un fichier .env à la racine du projet et le remplir tel que :
    ```properties
-    TELEGRAM_BOT_TOKEN=<le_token_du_bot_telegram>
-    GITHUB_SECRET=<le-secret_choisi-pour-les-webhooks>
-    CHAT_ID=<chat_id du supergroupe>
-    THREAD_ID=<id du thread dédié>
-    WEBHOOK_DOMAIN=<url publique du serveur>
+    TELEGRAM_BOT_TOKEN=<le-token-du-bot-telegram>
+    GITHUB_SECRET=<le-secret-choisi-pour-les-webhooks>
+    CHAT_ID=<chat_id-du-supergroupe>
+    THREAD_ID=<id-du-thread-dédié>
+    WEBHOOK_DOMAIN=<url-publique-du-serveur>
     ```
 
 - Pour obtenir `CHAT_ID` et `THREAD_ID`, utilise la commande `/get_chat_id` dans le thread voulu.
