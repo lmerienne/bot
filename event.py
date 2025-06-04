@@ -35,12 +35,12 @@ class PushEvent(GitHubEvent):
         commit_message = head_commit.get("message", "Aucun message") if head_commit else "Aucun message"
 
         return (
-            f"Nouveau push sur {common_info['repo_name']}\n"
-            f"Branche/Tag : {ref}\n"
-            f"Commits : {commit_count}\n"
-            f"Dernier commit : {commit_message[:500]}...\n"
-            f"Par : {common_info['sender_username']}\n"
-            f"[Voir dépôt]({common_info['repo_url']}) "
+            f"🚀 **Nouveau push sur** {common_info['repo_name']}\n"
+            f"🌿 **Branche/Tag :** {ref}\n"
+            f"📝 **Commits :** {commit_count}\n"
+            f"🔧 **Dernier commit :** {commit_message[:500]}...\n"
+            f"👤 **Auteur :** {common_info['sender_username']}\n"
+            f"📎 [Voir dépôt]({common_info['repo_url']}) "
         )
 
 class PullRequestEvent(GitHubEvent):
@@ -54,6 +54,8 @@ class PullRequestEvent(GitHubEvent):
 
         github_reviewers = [user.get("login") for user in pr_reviewers if user.get("login")]
         telegram_reviewers = []
+        head_branch = pr.get("head", {}).get("ref", "inconnue")
+        base_branch = pr.get("base", {}).get("ref", "inconnue")
 
         for github_user in github_reviewers:
             tg_username = UserManager.get_telegram_username(github_user)
@@ -67,11 +69,12 @@ class PullRequestEvent(GitHubEvent):
             pr_reviewers_str = "Reviewers : " + ", ".join(telegram_reviewers)
 
         return (
-            f"Nouvelle Pull Request sur {common_info['repo_name']}\n"
-            f"PR #{pr_number} : {pr_title[:100]}...\n"
-            f"Par : {common_info['sender_username']}\n"
-            f"{pr_reviewers_str}\n"
-            f"[Voir PR]({pr_url}) "
+            f"🔃 **Nouvelle Pull Request sur** {common_info['repo_name']}\n"
+            f"📌 **PR #{pr_number} :** {pr_title[:100]}...\n"
+            f"🌿 **Branche/Tag :** {head_branch} → {base_branch}\n"
+            f"👤 **Auteur :** {common_info['sender_username']}\n"
+            f"👀 **Reviewers assignés :** {pr_reviewers_str}\n"
+            f"📎 [Voir PR]({pr_url}) "
         )
     
 class PullRequestReviewEvent(GitHubEvent):
@@ -91,23 +94,24 @@ class PullRequestReviewEvent(GitHubEvent):
         pr_author = f"@{pr_author_telegram}" if pr_author_telegram else pr_author_github
 
         state = review.get("state", "commented").lower()
-        state_str = {
-            "approved": "a approuvé",
-            "changes_requested": "a demandé des changements sur",
-            "commented": "a commenté"
-        }.get(state, f"a fait une review sur")
+        state_map = {
+            "approved":      ("✅", "**a approuvé**"),
+            "changes_requested": ("🛑", "**a demandé des changements sur**"),
+            "commented":     ("💬", "**a commenté**"),
+        }
+        emoji, state_str = state_map.get(state, ("🔔", "**a fait une review sur**"))
 
         body = review.get("body", "")
 
         msg = (
-            f"{reviewer} {state_str} la PR de {pr_author} :\n"
-            f"PR #{pr_number} : {pr_title[:500]}...\n"
+            f"{emoji} {reviewer} {state_str} la PR de {pr_author} :\n"
+            f"📌 **PR #{pr_number} :** {pr_title[:500]}...\n"
         )
 
         if body:
-            msg += f"Commentaire :\n{body[:500]}...\n"
+            msg += f"**Commentaire :**\n{body[:500]}...\n"
         
-        msg += f"[Voir PR]({pr_url})"
+        msg += f"📎 [Voir PR]({pr_url})"
 
         return msg
 
