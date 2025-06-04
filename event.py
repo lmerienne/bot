@@ -112,9 +112,47 @@ class PullRequestReviewEvent(GitHubEvent):
         
         msg += f"📎 [Voir PR]({pr_url})"
         return msg
+    
+class CreateBranchEvent(GitHubEvent):
+    def format_message(self)->str:
+        common_info = self.get_info()
+        ref_type = self.data.get("ref_type")
+        ref = self.data.get("ref")
+
+        if ref_type == "branch":
+            action = "Nouvelle branche créée"
+        else :
+            action = "Nouveau Tag créé"
+
+        return (
+            f"✨ **{action} :** {common_info['repo_name']}\n"
+            f"🌿 **Branch/Tag :** {ref}\n"
+            f"👤 **Auteur :** {common_info['sender_username']}\n"
+            f"📎 [Voir dépôt]({common_info['repo_url']})"
+        )
+    
+class DeleteBranchEvent(GitHubEvent):
+    def format_message(self):
+        common_info = self.get_info()
+        ref_type = self.data.get("ref_type")
+        ref = self.data.get("ref")
+
+        if ref_type == "branch":
+            action = "Branche supprimée"
+        else :
+            action = "Tag supprimé"
+        
+        return (
+            f"✨ **{action} :** {common_info['repo_name']}\n"
+            f"🌿 **Branch/Tag :** {ref}\n"
+            f"👤 **Auteur :** {common_info['sender_username']}\n"
+            f"📎 [Voir dépôt]({common_info['repo_url']})"
+        )
 
 EVENT_CLASSES = {
     "push": PushEvent,
     "pull_request": PullRequestEvent,
     "pull_request_review": PullRequestReviewEvent,
+    "create_branch_event" : CreateBranchEvent,
+    "delete_branch_event" : DeleteBranchEvent
 }

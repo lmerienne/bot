@@ -1,7 +1,12 @@
 from typing import Dict, Any
 
 FILTERS = {
-    "enabled_events": ["push", "pull_request", "pull_request_review"],
+    "enabled_events": ["push", 
+                    "pull_request", 
+                    "pull_request_review", 
+                    "create_branch_event", 
+                    "delete_branch_event"],
+                    
     "excluded_actions": ["synchronize"],
 }
 
