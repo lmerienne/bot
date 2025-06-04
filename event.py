@@ -38,7 +38,7 @@ class PushEvent(GitHubEvent):
             f"Nouveau push sur {common_info['repo_name']}\n"
             f"Branche/Tag : {ref}\n"
             f"Commits : {commit_count}\n"
-            f"Dernier commit : {commit_message[:100]}...\n"
+            f"Dernier commit : {commit_message[:500]}...\n"
             f"Par : {common_info['sender_username']}\n"
             f"[Voir dépôt]({common_info['repo_url']}) "
         )
@@ -50,15 +50,69 @@ class PullRequestEvent(GitHubEvent):
         pr_number = pr.get("number", "N/A")
         pr_title = pr.get("title", "Aucun titre")
         pr_url = pr.get("html_url", " ")
+        pr_reviewers = pr.get("requested_reviewers", [])
+
+        github_reviewers = [user.get("login") for user in pr_reviewers if user.get("login")]
+        telegram_reviewers = []
+
+        for github_user in github_reviewers:
+            tg_username = UserManager.get_telegram_username(github_user)
+            if tg_username:
+                telegram_reviewers.append(f"@{tg_username}")
+            else:
+                telegram_reviewers.append(github_user)
+
+        pr_reviewers_str = ""
+        if telegram_reviewers:
+            pr_reviewers_str = "Reviewers : " + ", ".join(telegram_reviewers)
 
         return (
             f"Nouvelle Pull Request sur {common_info['repo_name']}\n"
             f"PR #{pr_number} : {pr_title[:100]}...\n"
             f"Par : {common_info['sender_username']}\n"
+            f"{pr_reviewers_str}\n"
             f"[Voir PR]({pr_url}) "
         )
+    
+class PullRequestReviewEvent(GitHubEvent):
+    def format_message(self)->str:
+        common_info = self.get_info()
+        review = self.data.get("review", {})
+        pr = self.data.get("pulle_request", {})
+        reviewer_github = review.get("user", {}).get("login", "Unknown")
+        reviewer_telegram = UserManager.get_telegram_username(reviewer_github)
+        reviewer = f"@{reviewer_telegram}" if reviewer_telegram else reviewer_github
+
+        pr_number = pr.get("number", "N/A")
+        pr_title = pr.get("title", "Aucun titre")
+        pr_url = pr.get("html_url", " ")
+        pr_author_github = pr.get("user", {}).get("login", "Unknown")
+        pr_author_telegram = UserManager.get_telegram_username(pr_author_github)
+        pr_author = f"@{pr_author_telegram}" if pr_author_telegram else pr_author_github
+
+        state = review.get("state", "commented").lower()
+        state_str = {
+            "approved": "a approuvé",
+            "changes_requested": "a demandé des changements sur",
+            "commented": "a commenté"
+        }.get(state, f"a fait une review sur")
+
+        body = review.get("body", "")
+
+        msg = (
+            f"{reviewer} {state_str} la PR de {pr_author} :\n"
+            f"PR #{pr_number} : {pr_title[:500]}...\n"
+        )
+
+        if body:
+            msg += f"Commentaire :\n{body[:500]}...\n"
+        
+        msg += f"[Voir PR]({pr_url})"
+
+        return msg
 
 EVENT_CLASSES = {
     "push": PushEvent,
     "pull_request": PullRequestEvent,
+    "pull_request_review": PullRequestReviewEvent,
 }
