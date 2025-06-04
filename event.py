@@ -35,7 +35,7 @@ class PushEvent(GitHubEvent):
         commit_message = head_commit.get("message", "Aucun message") if head_commit else "Aucun message"
 
         return (
-            f"🚀 **Nouveau push sur** {common_info['repo_name']}\n"
+            f"🚀 **Nouveau Push sur** {common_info['repo_name']}\n"
             f"🌿 **Branche/Tag :** {ref}\n"
             f"📝 **Commits :** {commit_count}\n"
             f"🔧 **Dernier commit :** {commit_message[:500]}...\n"
@@ -81,7 +81,7 @@ class PullRequestReviewEvent(GitHubEvent):
     def format_message(self)->str:
         common_info = self.get_info()
         review = self.data.get("review", {})
-        pr = self.data.get("pulle_request", {})
+        pr = self.data.get("pull_request", {})
         reviewer_github = review.get("user", {}).get("login", "Unknown")
         reviewer_telegram = UserManager.get_telegram_username(reviewer_github)
         reviewer = f"@{reviewer_telegram}" if reviewer_telegram else reviewer_github
@@ -95,14 +95,13 @@ class PullRequestReviewEvent(GitHubEvent):
 
         state = review.get("state", "commented").lower()
         state_map = {
-            "approved":      ("✅", "**a approuvé**"),
+            "approved":          ("✅", "**a approuvé**"),
             "changes_requested": ("🛑", "**a demandé des changements sur**"),
-            "commented":     ("💬", "**a commenté**"),
+            "commented":         ("💬", "**a commenté**"),
         }
         emoji, state_str = state_map.get(state, ("🔔", "**a fait une review sur**"))
 
         body = review.get("body", "")
-
         msg = (
             f"{emoji} {reviewer} {state_str} la PR de {pr_author} :\n"
             f"📌 **PR #{pr_number} :** {pr_title[:500]}...\n"
@@ -112,7 +111,6 @@ class PullRequestReviewEvent(GitHubEvent):
             msg += f"**Commentaire :**\n{body[:500]}...\n"
         
         msg += f"📎 [Voir PR]({pr_url})"
-
         return msg
 
 EVENT_CLASSES = {
