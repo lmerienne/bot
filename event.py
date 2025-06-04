@@ -34,10 +34,19 @@ class PushEvent(GitHubEvent):
         head_commit = self.data.get("head_commit", {})
         commit_message = head_commit.get("message", "Aucun message") if head_commit else "Aucun message"
         is_new_branch = self.data.get("created", False) and self.data.get("before", "").startswith("000")
+        is_deleted_branch = self.data.get("deleted", False) and self.data.get("after", "").startswith("000")
 
         if is_new_branch:
             return (
                 f"✨ **Nouvelle branche créée :** `{common_info['repo_name']}`\n"
+                f"🌿 **Branche :** `{ref}`\n"
+                f"👤 **Auteur :** {common_info['sender_username']}\n"
+                f"📎 [Voir dépôt]({common_info['repo_url']})"
+            )
+
+        if is_deleted_branch:
+            return (
+                f"🗑️ **Branche supprimée :** `{common_info['repo_name']}`\n"
                 f"🌿 **Branche :** `{ref}`\n"
                 f"👤 **Auteur :** {common_info['sender_username']}\n"
                 f"📎 [Voir dépôt]({common_info['repo_url']})"
