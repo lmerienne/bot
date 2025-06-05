@@ -11,6 +11,7 @@ services:
       - CHAT_ID=${CHAT_ID}
       - WEBHOOK_DOMAIN=${WEBHOOK_DOMAIN}
       - THREAD_ID=${THREAD_ID}
+      - PORT=8080
     restart: unless-stopped
     networks:
       - proxy-tier
