@@ -1,3 +1,4 @@
+# main.py
 import os
 from contextlib import asynccontextmanager
 from http import HTTPStatus
@@ -9,11 +10,9 @@ import uvicorn
 import logging
 import hmac
 
-from event import EVENT_CLASSES
-from filter import MessageFilter
 from commands import start, get_chat_id, link, unlink
 
-import hashlib
+from webhooks import receive_github_webhook, process_telegram_update
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
@@ -65,93 +64,13 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# Vérifie la signature envoyée par github
-def is_valid_github_signature(signature: str, raw_body: bytes) -> bool:
-    if not signature or not signature.startswith("sha256="):
-        return False
-    signature_hash = signature.split("=")[1]
-    mac = hmac.new(GITHUB_SECRET.encode('utf-8'), raw_body, hashlib.sha256)
-    computed_hash = mac.hexdigest()
-    return hmac.compare_digest(computed_hash, signature_hash)
-
-
-
-# Endpoint pour les webhooks telegram
 @app.post("/telegram")
-async def process_update(request: Request):
-    logger.info("Requête Telegram reçue")
-    try:
-        message = await request.json()
-        update = Update.de_json(data=message, bot=tg_bot.bot)
-        if update:
-            await tg_bot.process_update(update)
-        return Response(status_code=HTTPStatus.OK)
-    except Exception as e:
-        logger.error(f"Erreur dans process_update : {str(e)}")
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=str(e))
-    
+async def telegram_webhook_endpoint(request: Request):
+    return await process_telegram_update(request, tg_bot)
 
-# Endpoint pour les webhooks github
 @app.post("/webhook")
-async def receive_webhook(request: Request):
-    logger.info("Requête webhook GitHub reçue")
-    signature = request.headers.get("X-Hub-Signature-256")
-    logger.debug(f"Signature : {signature}")
-    if not signature:
-        logger.error("Signature manquante")
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Signature manquante")
-
-    raw_body = await request.body()
-    logger.debug(f"Body : {raw_body[:100]}...")
-
-    if not is_valid_github_signature(signature, raw_body):
-        logger.error("Signature invalide")
-        raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Signature invalide")
-
-    event = request.headers.get("X-GitHub-Event")
-    logger.info(f"Événement : {event}")
-    if not event:
-        logger.error("Événement manquant")
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Événement manquant")
-
-    try:
-        data = await request.json()
-        logger.debug(f"Données : {data}")
-
-        if event == "ping":
-            logger.info("Ping reçu")
-            return {"message": "Webhook pingé avec succès"}
-
-        message_filter = MessageFilter()
-        if not message_filter.is_event_enabled(event, data):
-            logger.info("Événement ignoré par les filtres")
-            return {"message": "Événement ignoré par les filtres"}
-
-        event_class = EVENT_CLASSES.get(event)
-        if not event_class:
-            logger.error("Événement non supporté")
-            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Événement non supporté")
-
-        event = event_class(data)
-        message = event.format_message()
-        if not message:
-            logger.error("Message vide")
-            raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Message vide")
-
-        logger.info(f"Envoi du message à CHAT_ID {CHAT_ID}: {message}")
-        await tg_bot.bot.send_message(
-            chat_id=CHAT_ID,
-            text=message,
-            parse_mode="Markdown",
-            message_thread_id=THREAD_ID
-        )
-        logger.info("Notification envoyée")
-        return {"message": "Notification envoyée"}
-
-    except Exception as e:
-        logger.error(f"Erreur : {str(e)}")
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=f"Erreur : {str(e)}")
-
+async def github_webhook_endpoint(request: Request):
+    return await receive_github_webhook(request, tg_bot)
 
 # Ajout des commandes au bot telegram
 tg_bot.add_handler(CommandHandler("start", start))
