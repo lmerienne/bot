@@ -1,0 +1,20 @@
+version: '3'
+services:
+  fastapi-bot:
+    build: .
+    environment:
+      - VIRTUAL_HOST=bots.lmerienne.dev
+      - LETSENCRYPT_HOST=bots.lmerienne.dev
+      - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - GITHUB_SECRET=${GITHUB_SECRET}
+      - CHAT_ID=${CHAT_ID}
+      - WEBHOOK_DOMAIN=${WEBHOOK_DOMAIN}
+      - THREAD_ID=${THREAD_ID}
+    restart: unless-stopped
+    networks:
+      - proxy-tier
+
+networks:
+  proxy-tier:
+    external: true
