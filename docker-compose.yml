@@ -19,3 +19,4 @@ services:
 networks:
   proxy-tier:
     external: true
+    name: docker-proxy_proxy-tier
